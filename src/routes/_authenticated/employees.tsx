@@ -16,7 +16,7 @@ export const Route = createFileRoute("/_authenticated/employees")({
 
 type Emp = Tables<"employees">;
 const DEPTS = ["Administration", "Grounds & Pitch", "Security", "Operations", "Maintenance", "Ticketing", "Catering"];
-const empty = { employee_no: "", full_name: "", position: "", department: DEPTS[0], phone: "", bank_name: "", account_no: "", nssf_no: "", base_salary: 0, allowances: 0, status: "active" };
+const empty = { employee_no: "", full_name: "", position: "", department: "Administration", phone: "", bank_name: "", account_no: "", nssf_no: "", base_salary: 0, allowances: 0, status: "active" };
 
 function Employees() {
   const qc = useQueryClient();
