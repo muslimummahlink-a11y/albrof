@@ -6,7 +6,7 @@ describe("Uganda payroll", () => {
   it("10% band", () => expect(computePaye(335_000)).toBe(10_000));
   it("20% band", () => expect(computePaye(410_000)).toBe(25_000));
   it("30% band", () => expect(computePaye(1_000_000)).toBe(202_000));
-  it("extra 10% above 10M", () => expect(computePaye(11_000_000)).toBe(3_277_000 + 100_000));
+  it("extra 10% above 10M", () => expect(computePaye(11_000_000)).toBe(3_202_000 + 100_000));
   it("NSSF 5% / 10% and net", () => {
     const p = computePayslip(900_000, 100_000);
     expect(p.nssf_employee).toBe(50_000);
