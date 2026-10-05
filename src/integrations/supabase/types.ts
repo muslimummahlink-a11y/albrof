@@ -14,16 +14,166 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      employees: {
+        Row: {
+          account_no: string | null
+          allowances: number
+          bank_name: string | null
+          base_salary: number
+          created_at: string
+          department: string
+          employee_no: string
+          full_name: string
+          hired_on: string
+          id: string
+          nssf_no: string | null
+          phone: string | null
+          position: string
+          status: string
+        }
+        Insert: {
+          account_no?: string | null
+          allowances?: number
+          bank_name?: string | null
+          base_salary?: number
+          created_at?: string
+          department: string
+          employee_no: string
+          full_name: string
+          hired_on?: string
+          id?: string
+          nssf_no?: string | null
+          phone?: string | null
+          position: string
+          status?: string
+        }
+        Update: {
+          account_no?: string | null
+          allowances?: number
+          bank_name?: string | null
+          base_salary?: number
+          created_at?: string
+          department?: string
+          employee_no?: string
+          full_name?: string
+          hired_on?: string
+          id?: string
+          nssf_no?: string | null
+          phone?: string | null
+          position?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      payroll_runs: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          period: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          period: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          period?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      payslips: {
+        Row: {
+          created_at: string
+          employee_id: string
+          gross: number
+          id: string
+          net: number
+          nssf_employee: number
+          nssf_employer: number
+          paye: number
+          run_id: string
+        }
+        Insert: {
+          created_at?: string
+          employee_id: string
+          gross: number
+          id?: string
+          net: number
+          nssf_employee: number
+          nssf_employer: number
+          paye: number
+          run_id: string
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          gross?: number
+          id?: string
+          net?: number
+          nssf_employee?: number
+          nssf_employer?: number
+          paye?: number
+          run_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payslips_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payslips_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_staff: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "hr"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +300,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "hr"],
+    },
   },
 } as const
