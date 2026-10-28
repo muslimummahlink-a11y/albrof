@@ -52,50 +52,91 @@
 
 :root {
   --radius: 0.25rem;
-  /* Stadium canopy white, signage navy, Uganda crimson/gold/black facade */
-  --background: oklch(0.975 0.004 250);
-  --foreground: oklch(0.2 0.05 265);
+  /* BMP Media Production black, white, and orange brand palette */
+  --background: oklch(0.98 0 0);
+  --foreground: oklch(0.16 0 0);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2 0.05 265);
+  --card-foreground: oklch(0.16 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.2 0.05 265);
-  --navy: oklch(0.28 0.08 265);
-  --navy-foreground: oklch(0.98 0.005 250);
-  --primary: oklch(0.55 0.21 27);
+  --navy: oklch(0.16 0 0);
+  --navy-foreground: oklch(0.99 0 0);
+  --primary: oklch(0.63 0.21 34);
   --primary-foreground: oklch(0.99 0 0);
-  --crimson: oklch(0.55 0.21 27);
-  --gold: oklch(0.82 0.16 85);
-  --pitch: oklch(0.16 0.01 265);
-  --secondary: oklch(0.94 0.01 250);
-  --secondary-foreground: oklch(0.28 0.08 265);
-  --muted: oklch(0.95 0.006 250);
-  --muted-foreground: oklch(0.5 0.03 260);
-  --accent: oklch(0.95 0.05 88);
-  --accent-foreground: oklch(0.3 0.06 70);
+  --crimson: oklch(0.63 0.21 34);
+  --gold: oklch(0.63 0.21 34);
+  --pitch: oklch(0.12 0 0);
+  --secondary: oklch(0.95 0 0);
+  --secondary-foreground: oklch(0.2 0 0);
+  --muted: oklch(0.95 0 0);
+  --muted-foreground: oklch(0.48 0 0);
+  --accent: oklch(0.95 0.035 34);
+  --accent-foreground: oklch(0.24 0.06 34);
   --destructive: oklch(0.58 0.22 27);
   --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.9 0.01 255);
-  --input: oklch(0.88 0.012 255);
-  --ring: oklch(0.55 0.21 27);
-  --chart-1: oklch(0.55 0.21 27);
-  --chart-2: oklch(0.82 0.16 85);
-  --chart-3: oklch(0.28 0.08 265);
-  --chart-4: oklch(0.16 0.01 265);
-  --chart-5: oklch(0.6 0.04 260);
-  --sidebar: oklch(0.24 0.07 265);
-  --sidebar-foreground: oklch(0.92 0.01 250);
-  --sidebar-primary: oklch(0.82 0.16 85);
-  --sidebar-primary-foreground: oklch(0.16 0.01 265);
-  --sidebar-accent: oklch(0.32 0.08 265);
+  --border: oklch(0.89 0 0);
+  --input: oklch(0.86 0 0);
+  --ring: oklch(0.63 0.21 34);
+  --chart-1: oklch(0.63 0.21 34);
+  --chart-2: oklch(0.16 0 0);
+  --chart-3: oklch(0.46 0 0);
+  --chart-4: oklch(0.75 0 0);
+  --chart-5: oklch(0.88 0 0);
+  --sidebar: oklch(0.14 0 0);
+  --sidebar-foreground: oklch(0.95 0 0);
+  --sidebar-primary: oklch(0.72 0.19 34);
+  --sidebar-primary-foreground: oklch(0.12 0 0);
+  --sidebar-accent: oklch(0.24 0 0);
   --sidebar-accent-foreground: oklch(0.99 0 0);
-  --sidebar-border: oklch(0.34 0.06 265);
-  --sidebar-ring: oklch(0.82 0.16 85);
+  --sidebar-border: oklch(0.3 0 0);
+  --sidebar-ring: oklch(0.72 0.19 34);
   --facade: repeating-linear-gradient(
-      90deg,
-      var(--pitch) 0 18px,
-      var(--gold) 18px 36px,
-      var(--crimson) 36px 54px
-    );
+    90deg,
+    var(--pitch) 0 18px,
+    var(--gold) 18px 36px,
+    oklch(1 0 0) 36px 54px
+  );
+}
+
+.dark {
+  color-scheme: dark;
+  --background: oklch(0.14 0 0);
+  --foreground: oklch(0.94 0 0);
+  --card: oklch(0.2 0 0);
+  --card-foreground: oklch(0.94 0 0);
+  --popover: oklch(0.2 0 0);
+  --popover-foreground: oklch(0.94 0 0);
+  --navy: oklch(0.9 0 0);
+  --navy-foreground: oklch(0.99 0 0);
+  --primary: oklch(0.69 0.19 34);
+  --primary-foreground: oklch(0.99 0 0);
+  --crimson: oklch(0.69 0.19 34);
+  --gold: oklch(0.69 0.19 34);
+  --pitch: oklch(0.1 0 0);
+  --secondary: oklch(0.28 0 0);
+  --secondary-foreground: oklch(0.9 0 0);
+  --muted: oklch(0.25 0 0);
+  --muted-foreground: oklch(0.7 0 0);
+  --accent: oklch(0.3 0.06 34);
+  --accent-foreground: oklch(0.94 0.025 34);
+  --destructive: oklch(0.68 0.19 25);
+  --destructive-foreground: oklch(0.99 0 0);
+  --border: oklch(0.34 0 0);
+  --input: oklch(0.34 0 0);
+  --ring: oklch(0.69 0.19 34);
+  --chart-1: oklch(0.69 0.19 34);
+  --chart-2: oklch(0.85 0 0);
+  --chart-3: oklch(0.65 0 0);
+  --chart-4: oklch(0.45 0 0);
+  --chart-5: oklch(0.3 0 0);
+  --sidebar: oklch(0.11 0 0);
+  --sidebar-foreground: oklch(0.92 0 0);
+  --sidebar-primary: oklch(0.69 0.19 34);
+  --sidebar-primary-foreground: oklch(0.1 0 0);
+  --sidebar-accent: oklch(0.24 0 0);
+  --sidebar-accent-foreground: oklch(0.96 0 0);
+  --sidebar-border: oklch(0.3 0 0);
+  --sidebar-ring: oklch(0.69 0.19 34);
 }
 
 @layer base {
@@ -107,10 +148,115 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
   }
-  h1, h2, h3 {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  select,
+  textarea {
+    border-radius: var(--radius-sm);
+    transition:
+      border-color 150ms ease,
+      box-shadow 150ms ease,
+      background-color 150ms ease;
+  }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--color-ring) 70%, transparent);
+    outline-offset: 1px;
+  }
+  select:not(.rdp select) {
+    min-height: 2.5rem;
+    appearance: none !important;
+    border: 1px solid var(--color-input);
+    border-radius: var(--radius-sm);
+    padding-right: 2.25rem;
+    background-color: var(--color-card) !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23637486' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat !important;
+    background-position: right 0.7rem center !important;
+    background-size: 1rem !important;
+    box-shadow: 0 1px 2px rgb(20 40 61 / 6%);
+    cursor: pointer;
+  }
+  select:not(.rdp select):hover:not(:disabled) {
+    border-color: color-mix(in oklab, var(--color-primary) 48%, var(--color-input));
+  }
+  select:not(.rdp select):focus-visible {
+    border-color: var(--color-ring);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-ring) 18%, transparent);
+  }
+  select:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+  .rdp select {
+    min-height: 0;
+    padding-right: 0;
+    border-radius: 0;
+    background-image: none;
+    transition: none;
+  }
+  option {
+    background-color: var(--color-card);
+    color: var(--color-card-foreground);
+  }
+  input[type="date"],
+  input[type="datetime-local"],
+  input[type="time"] {
+    min-height: 2.5rem;
+    color-scheme: light;
+  }
+  .dark input[type="date"],
+  .dark input[type="datetime-local"],
+  .dark input[type="time"] {
+    color-scheme: dark;
+  }
+  input[type="date"]::-webkit-calendar-picker-indicator,
+  input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+  input[type="time"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.72;
+  }
+  input[type="checkbox"],
+  input[type="radio"] {
+    accent-color: var(--color-primary);
+    cursor: pointer;
+  }
+  input[type="checkbox"]:focus-visible,
+  input[type="radio"]:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--color-ring) 70%, transparent);
+    outline-offset: 2px;
+  }
+  input[type="checkbox"]:disabled,
+  input[type="radio"]:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+  input[type="file"]::file-selector-button {
+    margin-right: 0.75rem;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: var(--color-primary);
+    padding: 0.5rem 0.875rem;
+    color: var(--color-primary-foreground);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 150ms ease;
+  }
+  input[type="file"]::file-selector-button:hover {
+    opacity: 0.88;
+  }
+  h1,
+  h2,
+  h3 {
     font-family: var(--font-display);
     letter-spacing: 0.01em;
   }
+}
+
+.auth-screen {
+  --font-display: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  --font-sans: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 @utility facade-stripe {
@@ -118,16 +264,28 @@
   background: var(--facade);
 }
 
-/* Diamond lattice inspired by the stadium facade */
+/* Diamond lattice inspired by the BMP media brand facade */
 @utility diamond-lattice {
   background-color: var(--navy);
   background-image:
-    linear-gradient(45deg, color-mix(in oklab, var(--crimson) 55%, transparent) 25%, transparent 25%),
+    linear-gradient(
+      45deg,
+      color-mix(in oklab, var(--crimson) 55%, transparent) 25%,
+      transparent 25%
+    ),
     linear-gradient(-45deg, color-mix(in oklab, var(--gold) 45%, transparent) 25%, transparent 25%),
     linear-gradient(45deg, transparent 75%, color-mix(in oklab, var(--pitch) 70%, transparent) 75%),
-    linear-gradient(-45deg, transparent 75%, color-mix(in oklab, var(--navy-foreground) 12%, transparent) 75%);
+    linear-gradient(
+      -45deg,
+      transparent 75%,
+      color-mix(in oklab, var(--navy-foreground) 12%, transparent) 75%
+    );
   background-size: 44px 44px;
-  background-position: 0 0, 0 22px, 22px -22px, -22px 0;
+  background-position:
+    0 0,
+    0 22px,
+    22px -22px,
+    -22px 0;
 }
 
 @utility signage {
@@ -135,4 +293,33 @@
   text-transform: uppercase;
   font-weight: 800;
   letter-spacing: 0.04em;
+}
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+
+  .quotation-print-sheet,
+  .quotation-print-sheet * {
+    visibility: visible !important;
+  }
+
+  .quotation-print-sheet {
+    position: fixed;
+    inset: 0;
+    display: block !important;
+    overflow: visible;
+    padding: 18mm;
+    background:
+      radial-gradient(circle at top left, rgba(245, 158, 11, 0.2), transparent 25%),
+      linear-gradient(135deg, #0c1117 0%, #101821 46%, #141b24 100%);
+    color: white;
+    box-shadow: none;
+  }
+
+  .quotation-print-sheet .print-brand-grid {
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.08));
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
 }

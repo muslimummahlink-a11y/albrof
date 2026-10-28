@@ -12,8 +12,23 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedAccountSettingsRouteImport } from './routes/_authenticated/account-settings'
+import { Route as AuthenticatedAttendanceRouteImport } from './routes/_authenticated/attendance'
+import { Route as AuthenticatedCasualPayrollImportRouteImport } from './routes/_authenticated/casual-payroll-import'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedEmployeesRouteImport } from './routes/_authenticated/employees'
+import { Route as AuthenticatedExpensesRouteImport } from './routes/_authenticated/expenses'
+import { Route as AuthenticatedFinanceRouteImport } from './routes/_authenticated/finance'
+import { Route as AuthenticatedFinanceReportsRouteImport } from './routes/_authenticated/finance-reports'
+import { Route as AuthenticatedIdCardsRouteImport } from './routes/_authenticated/id-cards'
+import { Route as AuthenticatedInvoicesRouteImport } from './routes/_authenticated/invoices'
+import { Route as AuthenticatedMyPayslipsRouteImport } from './routes/_authenticated/my-payslips'
+import { Route as AuthenticatedPayablesRouteImport } from './routes/_authenticated/payables'
+import { Route as AuthenticatedProjectsRouteImport } from './routes/_authenticated/projects'
+import { Route as AuthenticatedQuotationsRouteImport } from './routes/_authenticated/quotations'
+import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
+import { Route as AuthenticatedRequestsRouteImport } from './routes/_authenticated/requests'
+import { Route as AuthenticatedUserAccessRouteImport } from './routes/_authenticated/user-access'
 import { Route as AuthenticatedPayrollIndexRouteImport } from './routes/_authenticated/payroll.index'
 import { Route as AuthenticatedPayrollRunIdRouteImport } from './routes/_authenticated/payroll.$runId'
 
@@ -31,6 +46,23 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAccountSettingsRoute =
+  AuthenticatedAccountSettingsRouteImport.update({
+    id: '/account-settings',
+    path: '/account-settings',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAttendanceRoute = AuthenticatedAttendanceRouteImport.update({
+  id: '/attendance',
+  path: '/attendance',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCasualPayrollImportRoute =
+  AuthenticatedCasualPayrollImportRouteImport.update({
+    id: '/casual-payroll-import',
+    path: '/casual-payroll-import',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -39,6 +71,67 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
 const AuthenticatedEmployeesRoute = AuthenticatedEmployeesRouteImport.update({
   id: '/employees',
   path: '/employees',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedExpensesRoute = AuthenticatedExpensesRouteImport.update({
+  id: '/expenses',
+  path: '/expenses',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedFinanceRoute = AuthenticatedFinanceRouteImport.update({
+  id: '/finance',
+  path: '/finance',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedFinanceReportsRoute =
+  AuthenticatedFinanceReportsRouteImport.update({
+    id: '/finance-reports',
+    path: '/finance-reports',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedIdCardsRoute = AuthenticatedIdCardsRouteImport.update({
+  id: '/id-cards',
+  path: '/id-cards',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedInvoicesRoute = AuthenticatedInvoicesRouteImport.update({
+  id: '/invoices',
+  path: '/invoices',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMyPayslipsRoute = AuthenticatedMyPayslipsRouteImport.update({
+  id: '/my-payslips',
+  path: '/my-payslips',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPayablesRoute = AuthenticatedPayablesRouteImport.update({
+  id: '/payables',
+  path: '/payables',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedProjectsRoute = AuthenticatedProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedQuotationsRoute = AuthenticatedQuotationsRouteImport.update({
+  id: '/quotations',
+  path: '/quotations',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRequestsRoute = AuthenticatedRequestsRouteImport.update({
+  id: '/requests',
+  path: '/requests',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedUserAccessRoute = AuthenticatedUserAccessRouteImport.update({
+  id: '/user-access',
+  path: '/user-access',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPayrollIndexRoute =
@@ -57,16 +150,46 @@ const AuthenticatedPayrollRunIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/account-settings': typeof AuthenticatedAccountSettingsRoute
+  '/attendance': typeof AuthenticatedAttendanceRoute
+  '/casual-payroll-import': typeof AuthenticatedCasualPayrollImportRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/employees': typeof AuthenticatedEmployeesRoute
+  '/expenses': typeof AuthenticatedExpensesRoute
+  '/finance': typeof AuthenticatedFinanceRoute
+  '/finance-reports': typeof AuthenticatedFinanceReportsRoute
+  '/id-cards': typeof AuthenticatedIdCardsRoute
+  '/invoices': typeof AuthenticatedInvoicesRoute
+  '/my-payslips': typeof AuthenticatedMyPayslipsRoute
+  '/payables': typeof AuthenticatedPayablesRoute
+  '/projects': typeof AuthenticatedProjectsRoute
+  '/quotations': typeof AuthenticatedQuotationsRoute
+  '/reports': typeof AuthenticatedReportsRoute
+  '/requests': typeof AuthenticatedRequestsRoute
+  '/user-access': typeof AuthenticatedUserAccessRoute
   '/payroll/$runId': typeof AuthenticatedPayrollRunIdRoute
   '/payroll/': typeof AuthenticatedPayrollIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/account-settings': typeof AuthenticatedAccountSettingsRoute
+  '/attendance': typeof AuthenticatedAttendanceRoute
+  '/casual-payroll-import': typeof AuthenticatedCasualPayrollImportRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/employees': typeof AuthenticatedEmployeesRoute
+  '/expenses': typeof AuthenticatedExpensesRoute
+  '/finance': typeof AuthenticatedFinanceRoute
+  '/finance-reports': typeof AuthenticatedFinanceReportsRoute
+  '/id-cards': typeof AuthenticatedIdCardsRoute
+  '/invoices': typeof AuthenticatedInvoicesRoute
+  '/my-payslips': typeof AuthenticatedMyPayslipsRoute
+  '/payables': typeof AuthenticatedPayablesRoute
+  '/projects': typeof AuthenticatedProjectsRoute
+  '/quotations': typeof AuthenticatedQuotationsRoute
+  '/reports': typeof AuthenticatedReportsRoute
+  '/requests': typeof AuthenticatedRequestsRoute
+  '/user-access': typeof AuthenticatedUserAccessRoute
   '/payroll/$runId': typeof AuthenticatedPayrollRunIdRoute
   '/payroll': typeof AuthenticatedPayrollIndexRoute
 }
@@ -75,8 +198,23 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/account-settings': typeof AuthenticatedAccountSettingsRoute
+  '/_authenticated/attendance': typeof AuthenticatedAttendanceRoute
+  '/_authenticated/casual-payroll-import': typeof AuthenticatedCasualPayrollImportRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/employees': typeof AuthenticatedEmployeesRoute
+  '/_authenticated/expenses': typeof AuthenticatedExpensesRoute
+  '/_authenticated/finance': typeof AuthenticatedFinanceRoute
+  '/_authenticated/finance-reports': typeof AuthenticatedFinanceReportsRoute
+  '/_authenticated/id-cards': typeof AuthenticatedIdCardsRoute
+  '/_authenticated/invoices': typeof AuthenticatedInvoicesRoute
+  '/_authenticated/my-payslips': typeof AuthenticatedMyPayslipsRoute
+  '/_authenticated/payables': typeof AuthenticatedPayablesRoute
+  '/_authenticated/projects': typeof AuthenticatedProjectsRoute
+  '/_authenticated/quotations': typeof AuthenticatedQuotationsRoute
+  '/_authenticated/reports': typeof AuthenticatedReportsRoute
+  '/_authenticated/requests': typeof AuthenticatedRequestsRoute
+  '/_authenticated/user-access': typeof AuthenticatedUserAccessRoute
   '/_authenticated/payroll/$runId': typeof AuthenticatedPayrollRunIdRoute
   '/_authenticated/payroll/': typeof AuthenticatedPayrollIndexRoute
 }
@@ -85,20 +223,70 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/account-settings'
+    | '/attendance'
+    | '/casual-payroll-import'
     | '/dashboard'
     | '/employees'
+    | '/expenses'
+    | '/finance'
+    | '/finance-reports'
+    | '/id-cards'
+    | '/invoices'
+    | '/my-payslips'
+    | '/payables'
+    | '/projects'
+    | '/quotations'
+    | '/reports'
+    | '/requests'
+    | '/user-access'
     | '/payroll/$runId'
     | '/payroll/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    '/' | '/auth' | '/dashboard' | '/employees' | '/payroll/$runId' | '/payroll'
+    | '/'
+    | '/auth'
+    | '/account-settings'
+    | '/attendance'
+    | '/casual-payroll-import'
+    | '/dashboard'
+    | '/employees'
+    | '/expenses'
+    | '/finance'
+    | '/finance-reports'
+    | '/id-cards'
+    | '/invoices'
+    | '/my-payslips'
+    | '/payables'
+    | '/projects'
+    | '/quotations'
+    | '/reports'
+    | '/requests'
+    | '/user-access'
+    | '/payroll/$runId'
+    | '/payroll'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/account-settings'
+    | '/_authenticated/attendance'
+    | '/_authenticated/casual-payroll-import'
     | '/_authenticated/dashboard'
     | '/_authenticated/employees'
+    | '/_authenticated/expenses'
+    | '/_authenticated/finance'
+    | '/_authenticated/finance-reports'
+    | '/_authenticated/id-cards'
+    | '/_authenticated/invoices'
+    | '/_authenticated/my-payslips'
+    | '/_authenticated/payables'
+    | '/_authenticated/projects'
+    | '/_authenticated/quotations'
+    | '/_authenticated/reports'
+    | '/_authenticated/requests'
+    | '/_authenticated/user-access'
     | '/_authenticated/payroll/$runId'
     | '/_authenticated/payroll/'
   fileRoutesById: FileRoutesById
@@ -132,6 +320,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/account-settings': {
+      id: '/_authenticated/account-settings'
+      path: '/account-settings'
+      fullPath: '/account-settings'
+      preLoaderRoute: typeof AuthenticatedAccountSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/attendance': {
+      id: '/_authenticated/attendance'
+      path: '/attendance'
+      fullPath: '/attendance'
+      preLoaderRoute: typeof AuthenticatedAttendanceRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/casual-payroll-import': {
+      id: '/_authenticated/casual-payroll-import'
+      path: '/casual-payroll-import'
+      fullPath: '/casual-payroll-import'
+      preLoaderRoute: typeof AuthenticatedCasualPayrollImportRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -144,6 +353,90 @@ declare module '@tanstack/react-router' {
       path: '/employees'
       fullPath: '/employees'
       preLoaderRoute: typeof AuthenticatedEmployeesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/expenses': {
+      id: '/_authenticated/expenses'
+      path: '/expenses'
+      fullPath: '/expenses'
+      preLoaderRoute: typeof AuthenticatedExpensesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/finance': {
+      id: '/_authenticated/finance'
+      path: '/finance'
+      fullPath: '/finance'
+      preLoaderRoute: typeof AuthenticatedFinanceRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/finance-reports': {
+      id: '/_authenticated/finance-reports'
+      path: '/finance-reports'
+      fullPath: '/finance-reports'
+      preLoaderRoute: typeof AuthenticatedFinanceReportsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/id-cards': {
+      id: '/_authenticated/id-cards'
+      path: '/id-cards'
+      fullPath: '/id-cards'
+      preLoaderRoute: typeof AuthenticatedIdCardsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/invoices': {
+      id: '/_authenticated/invoices'
+      path: '/invoices'
+      fullPath: '/invoices'
+      preLoaderRoute: typeof AuthenticatedInvoicesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/my-payslips': {
+      id: '/_authenticated/my-payslips'
+      path: '/my-payslips'
+      fullPath: '/my-payslips'
+      preLoaderRoute: typeof AuthenticatedMyPayslipsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/payables': {
+      id: '/_authenticated/payables'
+      path: '/payables'
+      fullPath: '/payables'
+      preLoaderRoute: typeof AuthenticatedPayablesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/projects': {
+      id: '/_authenticated/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof AuthenticatedProjectsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/quotations': {
+      id: '/_authenticated/quotations'
+      path: '/quotations'
+      fullPath: '/quotations'
+      preLoaderRoute: typeof AuthenticatedQuotationsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reports': {
+      id: '/_authenticated/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AuthenticatedReportsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/requests': {
+      id: '/_authenticated/requests'
+      path: '/requests'
+      fullPath: '/requests'
+      preLoaderRoute: typeof AuthenticatedRequestsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/user-access': {
+      id: '/_authenticated/user-access'
+      path: '/user-access'
+      fullPath: '/user-access'
+      preLoaderRoute: typeof AuthenticatedUserAccessRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/payroll/': {
@@ -164,15 +457,45 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAccountSettingsRoute: typeof AuthenticatedAccountSettingsRoute
+  AuthenticatedAttendanceRoute: typeof AuthenticatedAttendanceRoute
+  AuthenticatedCasualPayrollImportRoute: typeof AuthenticatedCasualPayrollImportRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedEmployeesRoute: typeof AuthenticatedEmployeesRoute
+  AuthenticatedExpensesRoute: typeof AuthenticatedExpensesRoute
+  AuthenticatedFinanceRoute: typeof AuthenticatedFinanceRoute
+  AuthenticatedFinanceReportsRoute: typeof AuthenticatedFinanceReportsRoute
+  AuthenticatedIdCardsRoute: typeof AuthenticatedIdCardsRoute
+  AuthenticatedInvoicesRoute: typeof AuthenticatedInvoicesRoute
+  AuthenticatedMyPayslipsRoute: typeof AuthenticatedMyPayslipsRoute
+  AuthenticatedPayablesRoute: typeof AuthenticatedPayablesRoute
+  AuthenticatedProjectsRoute: typeof AuthenticatedProjectsRoute
+  AuthenticatedQuotationsRoute: typeof AuthenticatedQuotationsRoute
+  AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
+  AuthenticatedRequestsRoute: typeof AuthenticatedRequestsRoute
+  AuthenticatedUserAccessRoute: typeof AuthenticatedUserAccessRoute
   AuthenticatedPayrollRunIdRoute: typeof AuthenticatedPayrollRunIdRoute
   AuthenticatedPayrollIndexRoute: typeof AuthenticatedPayrollIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAccountSettingsRoute: AuthenticatedAccountSettingsRoute,
+  AuthenticatedAttendanceRoute: AuthenticatedAttendanceRoute,
+  AuthenticatedCasualPayrollImportRoute: AuthenticatedCasualPayrollImportRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedEmployeesRoute: AuthenticatedEmployeesRoute,
+  AuthenticatedExpensesRoute: AuthenticatedExpensesRoute,
+  AuthenticatedFinanceRoute: AuthenticatedFinanceRoute,
+  AuthenticatedFinanceReportsRoute: AuthenticatedFinanceReportsRoute,
+  AuthenticatedIdCardsRoute: AuthenticatedIdCardsRoute,
+  AuthenticatedInvoicesRoute: AuthenticatedInvoicesRoute,
+  AuthenticatedMyPayslipsRoute: AuthenticatedMyPayslipsRoute,
+  AuthenticatedPayablesRoute: AuthenticatedPayablesRoute,
+  AuthenticatedProjectsRoute: AuthenticatedProjectsRoute,
+  AuthenticatedQuotationsRoute: AuthenticatedQuotationsRoute,
+  AuthenticatedReportsRoute: AuthenticatedReportsRoute,
+  AuthenticatedRequestsRoute: AuthenticatedRequestsRoute,
+  AuthenticatedUserAccessRoute: AuthenticatedUserAccessRoute,
   AuthenticatedPayrollRunIdRoute: AuthenticatedPayrollRunIdRoute,
   AuthenticatedPayrollIndexRoute: AuthenticatedPayrollIndexRoute,
 }
