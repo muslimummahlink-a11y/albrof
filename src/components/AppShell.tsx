@@ -76,28 +76,24 @@ export function AppShell({
     queryKey: ["access"],
     queryFn: async () => {
       if (devAuthBypass) {
-        return { email: "developer@localhost", roles: ["admin"], employeeId: null, aal2: true };
+        return { email: "developer@localhost", roles: ["admin"], employeeId: null };
       }
       const { data: auth, error: authError } = await supabase.auth.getUser();
       if (authError) throw authError;
-      if (!auth.user) return { email: "", roles: [], employeeId: null, aal2: false };
+      if (!auth.user) return { email: "", roles: [], employeeId: null };
       const [
         { data: roles, error: rolesError },
         { data: employee, error: employeeError },
-        { data: assurance, error: assuranceError },
       ] = await Promise.all([
         supabase.from("user_roles").select("role").eq("user_id", auth.user.id),
         supabase.from("employees").select("id").eq("auth_user_id", auth.user.id).maybeSingle(),
-        supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
       ]);
       if (rolesError) throw rolesError;
       if (employeeError) throw employeeError;
-      if (assuranceError) throw assuranceError;
       return {
         email: auth.user.email ?? "",
         roles: (roles ?? []).map((row) => row.role),
         employeeId: employee?.id ?? null,
-        aal2: assurance.currentLevel === "aal2",
       };
     },
   });
@@ -256,30 +252,16 @@ export function AppShell({
             isInvoicePage ||
             isQuotationPage ||
             isPayablesPage) &&
-            (!canAccessFinance || !access.aal2)) ||
-            (isProjectPage && (!canAccessProjects || (canAccessFinance && !access.aal2))) ||
-            (isUserAccessPage && (!canManageAccess || !access.aal2)) ||
+            !canAccessFinance) ||
+            (isProjectPage && !canAccessProjects) ||
+            (isUserAccessPage && !canManageAccess) ||
             (isPayrollManagementPage &&
               !canManagePayroll &&
               !(pathname === "/requests" && access.employeeId))) ? (
             <div className="rounded-sm border-l-4 border-destructive bg-destructive/10 p-6 text-destructive">
-              <h2 className="signage text-xl">
-                {canAccessFinance && !access.aal2
-                  ? "MFA verification required"
-                  : "Authorised role required"}
-              </h2>
+              <h2 className="signage text-xl">Authorised role required</h2>
               <p className="mt-1 text-sm">
-                {canAccessFinance && !access.aal2 ? (
-                  <>
-                    Verify your authenticator in{" "}
-                    <Link className="font-semibold underline" to="/account-settings">
-                      Account settings
-                    </Link>{" "}
-                    before opening finance records.
-                  </>
-                ) : (
-                  "Your assigned role does not have access to this page."
-                )}
+                Your assigned role does not have access to this page.
               </p>
             </div>
           ) : access && !isStaff && (!access.employeeId || !isEmployeePage) ? (

@@ -37,28 +37,24 @@ function Dashboard() {
   const [runSearch, setRunSearch] = useState("");
   const [runStatus, setRunStatus] = useState("all");
   const [month] = useState(currentMonthInUganda);
-  const { data: financeAccess = { canView: false, aal2: false } } = useQuery({
+  const { data: financeAccess = { canView: false } } = useQuery({
     queryKey: ["dashboard-finance-access"],
     queryFn: async () => {
-      if (devAuthBypass) return { canView: true, aal2: true };
+      if (devAuthBypass) return { canView: true };
       const { data: auth, error: authError } = await supabase.auth.getUser();
       if (authError) throw authError;
-      if (!auth.user) return { canView: false, aal2: false };
+      if (!auth.user) return { canView: false };
       const { data, error } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", auth.user.id);
       if (error) throw error;
-      const { data: assurance, error: assuranceError } =
-        await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-      if (assuranceError) throw assuranceError;
       return {
         canView: (data ?? []).some((role) => role.role === "admin" || role.role === "accountant"),
-        aal2: assurance.currentLevel === "aal2",
       };
     },
   });
-  const canViewFinance = financeAccess.canView && financeAccess.aal2;
+  const canViewFinance = financeAccess.canView;
 
   const { data: emps = [] } = useQuery({
     queryKey: ["employees"],
@@ -281,22 +277,11 @@ function Dashboard() {
               )}
             </div>
           </section>
-        ) : financeAccess.canView && !financeAccess.aal2 ? (
-          <section className="rounded-sm border bg-card p-5">
-            <h2 className="signage text-xl text-navy">Financial overview</h2>
-            <p className="mt-3 text-sm text-muted-foreground">
-              Verify your authenticator in{" "}
-              <Link to="/account-settings" className="font-semibold text-primary underline">
-                Account settings
-              </Link>{" "}
-              to view finance data.
-            </p>
-          </section>
         ) : (
           <section className="rounded-sm border bg-card p-5">
             <h2 className="signage text-xl text-navy">Financial overview</h2>
             <p className="mt-3 text-sm text-muted-foreground">
-              Account balances and transaction totals are restricted to verified finance staff.
+              Account balances and transaction totals are restricted to finance staff.
             </p>
           </section>
         )}
@@ -349,7 +334,7 @@ function Dashboard() {
               </>
             ) : (
               <p className="rounded-sm border p-3 text-sm text-muted-foreground">
-                Financial highlights are restricted to verified finance staff.
+                Financial highlights are restricted to finance staff.
               </p>
             )}
             <div className="rounded-sm border p-3">

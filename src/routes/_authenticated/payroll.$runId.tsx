@@ -9,7 +9,6 @@ import { StyledSelect } from "@/components/StyledSelect";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ugx } from "@/lib/payroll";
 import { downloadCsv } from "@/lib/export";
-import { devAuthBypass } from "@/lib/dev-auth";
 
 function todayInUganda() {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -54,18 +53,9 @@ function RunDetail() {
       return Boolean(data);
     },
   });
-  const { data: hasFinanceMfa = false } = useQuery({
-    queryKey: ["payroll-finance-mfa"],
-    queryFn: async () => {
-      if (devAuthBypass) return true;
-      const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-      if (error) throw error;
-      return data.currentLevel === "aal2";
-    },
-  });
   const { data: payrollAccounts = [] } = useQuery({
     queryKey: ["payroll-payment-accounts"],
-    enabled: isAdmin && hasFinanceMfa,
+    enabled: isAdmin,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("financial_account_balances")
@@ -226,7 +216,6 @@ function RunDetail() {
             {data.status === "draft" && (
               <button
                 onClick={() => setPayDialogOpen(true)}
-                disabled={!hasFinanceMfa}
                 className="signage rounded-sm bg-primary px-4 py-2 text-primary-foreground"
               >
                 Pay & post
@@ -419,11 +408,6 @@ function RunDetail() {
             This records the net payment from a UGX account and posts gross pay, PAYE, and NSSF to
             the ledger. The operation is atomic and cannot be repeated.
           </p>
-          {!hasFinanceMfa && (
-            <p role="alert" className="rounded-sm bg-destructive/10 p-3 text-sm text-destructive">
-              Verify MFA in Account settings before posting payroll.
-            </p>
-          )}
           <div className="space-y-3">
             <label className="block space-y-1 text-sm font-medium">
               UGX payment account
@@ -476,7 +460,6 @@ function RunDetail() {
               className="w-full rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
               disabled={
                 markPaid.isPending ||
-                !hasFinanceMfa ||
                 !paymentAccountId ||
                 !paymentDate ||
                 !paymentReason.trim()
