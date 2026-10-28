@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
+import { EmployeePhoto } from "@/components/EmployeePhoto";
 import { DatePicker } from "@/components/DatePicker";
 import { StyledSelect } from "@/components/StyledSelect";
 import { supabase } from "@/integrations/supabase/client";
@@ -53,7 +54,7 @@ function Requests() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("employee_requests")
-        .select("*, employees(full_name, employee_no, department)")
+        .select("*, employees(full_name, employee_no, department, photo_path)")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -278,12 +279,19 @@ function Requests() {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     {access?.isStaff && (
-                      <>
-                        <p className="font-semibold">{request.employees?.full_name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {request.employees?.employee_no} · {request.employees?.department}
-                        </p>
-                      </>
+                      <div className="mb-2 flex items-center gap-2">
+                        <EmployeePhoto
+                          path={request.employees?.photo_path}
+                          name={request.employees?.full_name ?? "Unknown staff"}
+                          className="h-9 w-9"
+                        />
+                        <div>
+                          <p className="font-semibold">{request.employees?.full_name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {request.employees?.employee_no} · {request.employees?.department}
+                          </p>
+                        </div>
+                      </div>
                     )}
                     <p className={`${access?.isStaff ? "mt-2" : ""} font-semibold capitalize`}>
                       {request.request_type} request

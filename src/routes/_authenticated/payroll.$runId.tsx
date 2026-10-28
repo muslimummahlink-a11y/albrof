@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { EmployeePhoto } from "@/components/EmployeePhoto";
 import { AppShell, Stat } from "@/components/AppShell";
 import { StyledSelect } from "@/components/StyledSelect";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -285,11 +286,18 @@ function RunDetail() {
           {filteredSlips.map((item) => (
             <article key={item.id} className="rounded-sm border bg-card p-4">
               <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="truncate font-semibold">{item.employees?.full_name}</p>
-                  <p className="font-mono text-xs text-muted-foreground">
-                    {item.employees?.employee_no} · {item.employees?.department}
-                  </p>
+                <div className="flex min-w-0 items-center gap-3">
+                  <EmployeePhoto
+                    path={item.employees?.photo_path}
+                    name={item.employees?.full_name ?? "Unknown staff"}
+                    className="h-12 w-12"
+                  />
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold">{item.employees?.full_name}</p>
+                    <p className="font-mono text-xs text-muted-foreground">
+                      {item.employees?.employee_no} · {item.employees?.department}
+                    </p>
+                  </div>
                 </div>
                 <button
                   onClick={() => setSlipId(item.id)}
@@ -347,11 +355,20 @@ function RunDetail() {
               <div className="facade-stripe" />
               <div className="space-y-4 p-6 text-sm">
                 <div>
-                  <p className="signage text-xl text-navy">{slip.employees?.full_name}</p>
-                  <p className="text-muted-foreground">
-                    {slip.employees?.position} · {slip.employees?.department} · #
-                    {slip.employees?.employee_no}
-                  </p>
+                  <div className="mb-3 flex items-center gap-3">
+                    <EmployeePhoto
+                      path={slip.employees?.photo_path}
+                      name={slip.employees?.full_name ?? "Unknown staff"}
+                      className="h-12 w-12"
+                    />
+                    <div>
+                      <p className="signage text-xl text-navy">{slip.employees?.full_name}</p>
+                      <p className="text-muted-foreground">
+                        {slip.employees?.position} · {slip.employees?.department} · #
+                        {slip.employees?.employee_no}
+                      </p>
+                    </div>
+                  </div>
                 </div>
                 <dl className="divide-y">
                   {[
@@ -459,10 +476,7 @@ function RunDetail() {
             <button
               className="w-full rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
               disabled={
-                markPaid.isPending ||
-                !paymentAccountId ||
-                !paymentDate ||
-                !paymentReason.trim()
+                markPaid.isPending || !paymentAccountId || !paymentDate || !paymentReason.trim()
               }
               onClick={() => markPaid.mutate()}
               type="button"

@@ -4,8 +4,9 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import type { Tables } from "@/integrations/supabase/types";
+import type { Json, Tables } from "@/integrations/supabase/types";
 import { AppShell } from "@/components/AppShell";
+import { EmployeePhoto } from "@/components/EmployeePhoto";
 import { PdfExportDialog } from "@/components/PdfExportDialog";
 import { StyledSelect } from "@/components/StyledSelect";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -17,6 +18,14 @@ export const Route = createFileRoute("/_authenticated/employees")({
 });
 
 type Emp = Tables<"employees">;
+type EmployeeDocument = { name: string; path: string };
+type EmployeeSaveInput = {
+  employee: Partial<Emp>;
+  photo: File | null;
+  cv: File | null;
+  applicationLetter: File | null;
+  otherDocuments: File[];
+};
 const DEPTS = [
   "Administration",
   "Grounds & Pitch",
@@ -41,7 +50,32 @@ const empty = {
   daily_rate: null,
   status: "active",
   auth_user_id: null,
+  photo_path: null,
+  cv_path: null,
+  application_letter_path: null,
+  other_documents: [],
 };
+
+const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const DOCUMENT_TYPES = [
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "image/jpeg",
+  "image/png",
+  "text/plain",
+];
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
+function documentsOf(value: Json | null | undefined): EmployeeDocument[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((document) => {
+    if (typeof document !== "object" || document === null || Array.isArray(document)) return [];
+    const name = document["name"];
+    const path = document["path"];
+    return typeof name === "string" && typeof path === "string" ? [{ name, path }] : [];
+  });
+}
 
 function Employees() {
   const qc = useQueryClient();
@@ -50,6 +84,10 @@ function Employees() {
   const [departmentFilter, setDepartmentFilter] = useState("all");
   const [employmentFilter, setEmploymentFilter] = useState("all");
   const [edit, setEdit] = useState<Partial<Emp> | null>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [cvFile, setCvFile] = useState<File | null>(null);
+  const [applicationLetterFile, setApplicationLetterFile] = useState<File | null>(null);
+  const [otherDocumentFiles, setOtherDocumentFiles] = useState<File[]>([]);
   const { data: emps = [] } = useQuery({
     queryKey: ["employees"],
     queryFn: async () =>
@@ -57,8 +95,30 @@ function Employees() {
   });
 
   const save = useMutation({
-    mutationFn: async (e: Partial<Emp>) => {
-      const { id, created_at, ...rest } = e as Emp;
+    mutationFn: async ({
+      employee,
+      photo,
+      cv,
+      applicationLetter,
+      otherDocuments,
+    }: EmployeeSaveInput) => {
+      if (photo && (!PHOTO_TYPES.includes(photo.type) || photo.size > 5 * 1024 * 1024)) {
+        throw new Error("Photo must be a JPEG, PNG, or WebP no larger than 5 MB.");
+      }
+      const allDocuments = [cv, applicationLetter, ...otherDocuments].filter(
+        (file): file is File => file !== null,
+      );
+      if (
+        allDocuments.some(
+          (file) => !DOCUMENT_TYPES.includes(file.type) || file.size > MAX_FILE_SIZE,
+        )
+      ) {
+        throw new Error(
+          "Documents must be PDF, Word, PNG, JPEG, or text files no larger than 10 MB each.",
+        );
+      }
+
+      const { id, created_at, ...rest } = employee as Emp;
       const payload = {
         ...rest,
         auth_user_id: rest.auth_user_id?.trim() || null,
@@ -69,15 +129,78 @@ function Employees() {
             ? Number(rest.daily_rate)
             : null,
       };
-      const { error } = id
-        ? await supabase.from("employees").update(payload).eq("id", id)
-        : await supabase.from("employees").insert(payload);
-      if (error) throw error;
+      const employeeId = id ?? crypto.randomUUID();
+      const { error: saveError } = id
+        ? await supabase.from("employees").update(payload).eq("id", employeeId)
+        : await supabase.from("employees").insert({ ...payload, id: employeeId });
+      if (saveError) throw saveError;
+
+      const filePaths = {
+        photo_path: payload.photo_path ?? null,
+        cv_path: payload.cv_path ?? null,
+        application_letter_path: payload.application_letter_path ?? null,
+        other_documents: documentsOf(payload.other_documents),
+      };
+      const uploadFile = async (file: File, category: string) => {
+        const safeName = file.name.replace(/[\\/:*?"<>|]/g, "_");
+        const path = `${employeeId}/${category}/${crypto.randomUUID()}-${safeName}`;
+        const { error } = await supabase.storage
+          .from("employee-documents")
+          .upload(path, file, { contentType: file.type, upsert: false });
+        if (error) throw error;
+        return path;
+      };
+
+      let uploadError: string | null = null;
+      try {
+        if (photo) filePaths.photo_path = await uploadFile(photo, "photo");
+        if (cv) filePaths.cv_path = await uploadFile(cv, "cv");
+        if (applicationLetter) {
+          filePaths.application_letter_path = await uploadFile(
+            applicationLetter,
+            "application-letter",
+          );
+        }
+        for (const document of otherDocuments) {
+          filePaths.other_documents.push({
+            name: document.name,
+            path: await uploadFile(document, "other"),
+          });
+        }
+      } catch (error) {
+        uploadError = error instanceof Error ? error.message : "Unknown upload error.";
+      }
+
+      const { error: filesSaveError } = await supabase
+        .from("employees")
+        .update(filePaths)
+        .eq("id", employeeId);
+      if (filesSaveError) {
+        throw new Error(
+          uploadError
+            ? `Staff details were saved, but uploaded files could not be linked: ${filesSaveError.message}`
+            : `Staff details were saved, but document links could not be updated: ${filesSaveError.message}`,
+        );
+      }
+
+      return {
+        employee: { ...employee, ...payload, ...filePaths, id: employeeId },
+        uploadError,
+      };
     },
-    onSuccess: () => {
+    onSuccess: ({ employee, uploadError }) => {
       qc.invalidateQueries({ queryKey: ["employees"] });
-      setEdit(null);
-      toast.success("Staff saved");
+      if (uploadError) {
+        setEdit(employee);
+        setPhotoFile(null);
+        setCvFile(null);
+        setApplicationLetterFile(null);
+        setOtherDocumentFiles([]);
+        toast.error(`Staff saved, but a document upload failed: ${uploadError}`);
+      } else {
+        closeEditor();
+        toast.success("Staff saved");
+      }
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -197,6 +320,35 @@ function Employees() {
   };
   const inp =
     "w-full rounded-sm border border-input bg-card px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring";
+  const fileInput =
+    "mt-1 block w-full rounded-sm border border-input bg-card px-3 py-2 text-xs font-normal";
+
+  function openEditor(employee: Partial<Emp>) {
+    setPhotoFile(null);
+    setCvFile(null);
+    setApplicationLetterFile(null);
+    setOtherDocumentFiles([]);
+    setEdit(employee);
+  }
+
+  function closeEditor() {
+    setEdit(null);
+    setPhotoFile(null);
+    setCvFile(null);
+    setApplicationLetterFile(null);
+    setOtherDocumentFiles([]);
+  }
+
+  async function openEmployeeFile(path: string, label: string) {
+    const { data, error } = await supabase.storage
+      .from("employee-documents")
+      .createSignedUrl(path, 60);
+    if (error) {
+      toast.error(`${label} could not be opened: ${error.message}`);
+      return;
+    }
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+  }
 
   return (
     <AppShell
@@ -219,7 +371,7 @@ function Employees() {
             onExport={exportEmployees}
           />
           <button
-            onClick={() => setEdit(empty)}
+            onClick={() => openEditor(empty)}
             className="signage flex items-center gap-1 rounded-sm bg-primary px-4 py-2 text-primary-foreground"
           >
             <Plus className="h-4 w-4" />
@@ -288,11 +440,18 @@ function Employees() {
                 <div className="diamond-lattice h-2" />
                 <div className="p-4">
                   <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate font-semibold">{employee.full_name}</p>
-                      <p className="mt-0.5 font-mono text-xs text-muted-foreground">
-                        {employee.employee_no}
-                      </p>
+                    <div className="flex min-w-0 items-center gap-3">
+                      <EmployeePhoto
+                        path={employee.photo_path}
+                        name={employee.full_name}
+                        className="h-12 w-12"
+                      />
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold">{employee.full_name}</p>
+                        <p className="mt-0.5 font-mono text-xs text-muted-foreground">
+                          {employee.employee_no}
+                        </p>
+                      </div>
                     </div>
                     <span
                       className={`shrink-0 rounded-sm px-2 py-0.5 text-xs font-bold uppercase ${employee.status === "active" ? "bg-accent text-accent-foreground" : "bg-secondary text-muted-foreground"}`}
@@ -330,7 +489,7 @@ function Employees() {
                   <div className="mt-4 flex justify-end gap-3 border-t pt-3">
                     <button
                       aria-label={`Edit ${employee.full_name}`}
-                      onClick={() => setEdit(employee)}
+                      onClick={() => openEditor(employee)}
                       className="rounded-sm p-2 text-navy hover:bg-secondary"
                     >
                       <Pencil className="h-4 w-4" />
@@ -352,7 +511,7 @@ function Employees() {
         </div>
       )}
 
-      <Dialog open={!!edit} onOpenChange={(o) => !o && setEdit(null)}>
+      <Dialog open={!!edit} onOpenChange={(o) => !o && closeEditor()}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle className="signage text-2xl text-navy">
@@ -362,7 +521,15 @@ function Employees() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              if (edit) save.mutate(edit);
+              if (edit) {
+                save.mutate({
+                  employee: edit,
+                  photo: photoFile,
+                  cv: cvFile,
+                  applicationLetter: applicationLetterFile,
+                  otherDocuments: otherDocumentFiles,
+                });
+              }
             }}
             className="grid gap-3 sm:grid-cols-2"
           >
@@ -375,7 +542,7 @@ function Employees() {
               <input required className={inp} {...f("full_name")} />
             </label>
             <label className="text-xs font-bold">
-              Position
+              Role / Position
               <input required className={inp} {...f("position")} />
             </label>
             <label className="text-xs font-bold">
@@ -455,10 +622,95 @@ function Employees() {
                 className={inp}
               />
             </label>
-            <div className="flex items-end justify-end gap-2">
+            <section className="grid gap-3 rounded-sm border p-3 sm:col-span-2 sm:grid-cols-2">
+              <h3 className="text-sm font-bold sm:col-span-2">Staff photo and documents</h3>
+              <div className="text-xs font-bold">
+                <label htmlFor="employee-photo">Photo (JPEG, PNG, or WebP; max 5 MB)</label>
+                <input
+                  id="employee-photo"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className={fileInput}
+                  onChange={(event) => setPhotoFile(event.target.files?.[0] ?? null)}
+                />
+                {edit?.photo_path && (
+                  <button
+                    type="button"
+                    className="mt-1 text-left font-normal text-primary underline"
+                    onClick={() => openEmployeeFile(edit.photo_path!, "Staff photo")}
+                  >
+                    View current photo
+                  </button>
+                )}
+              </div>
+              <div className="text-xs font-bold">
+                <label htmlFor="employee-cv">CV / résumé (max 10 MB)</label>
+                <input
+                  id="employee-cv"
+                  type="file"
+                  accept=".pdf,.doc,.docx,.txt,image/jpeg,image/png"
+                  className={fileInput}
+                  onChange={(event) => setCvFile(event.target.files?.[0] ?? null)}
+                />
+                {edit?.cv_path && (
+                  <button
+                    type="button"
+                    className="mt-1 text-left font-normal text-primary underline"
+                    onClick={() => openEmployeeFile(edit.cv_path!, "CV")}
+                  >
+                    View current CV
+                  </button>
+                )}
+              </div>
+              <div className="text-xs font-bold">
+                <label htmlFor="employee-application-letter">Application letter (max 10 MB)</label>
+                <input
+                  id="employee-application-letter"
+                  type="file"
+                  accept=".pdf,.doc,.docx,.txt,image/jpeg,image/png"
+                  className={fileInput}
+                  onChange={(event) => setApplicationLetterFile(event.target.files?.[0] ?? null)}
+                />
+                {edit?.application_letter_path && (
+                  <button
+                    type="button"
+                    className="mt-1 text-left font-normal text-primary underline"
+                    onClick={() =>
+                      openEmployeeFile(edit.application_letter_path!, "Application letter")
+                    }
+                  >
+                    View current application letter
+                  </button>
+                )}
+              </div>
+              <div className="text-xs font-bold">
+                <label htmlFor="employee-other-documents">
+                  Other documents (multiple files, max 10 MB each)
+                </label>
+                <input
+                  id="employee-other-documents"
+                  type="file"
+                  multiple
+                  accept=".pdf,.doc,.docx,.txt,image/jpeg,image/png"
+                  className={fileInput}
+                  onChange={(event) => setOtherDocumentFiles(Array.from(event.target.files ?? []))}
+                />
+                {documentsOf(edit?.other_documents).map((document) => (
+                  <button
+                    key={document.path}
+                    type="button"
+                    className="mt-1 block text-left font-normal text-primary underline"
+                    onClick={() => openEmployeeFile(document.path, document.name)}
+                  >
+                    {document.name}
+                  </button>
+                ))}
+              </div>
+            </section>
+            <div className="flex items-end justify-end gap-2 sm:col-span-2">
               <button
                 type="button"
-                onClick={() => setEdit(null)}
+                onClick={closeEditor}
                 className="rounded-sm border px-4 py-2 text-sm font-semibold"
               >
                 Cancel

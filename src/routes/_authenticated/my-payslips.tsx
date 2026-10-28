@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
+import { EmployeePhoto } from "@/components/EmployeePhoto";
 import { MonthPicker } from "@/components/MonthPicker";
 import { PdfExportDialog, type PdfExportFilters } from "@/components/PdfExportDialog";
 import { StyledSelect } from "@/components/StyledSelect";
@@ -27,7 +28,9 @@ function MyPayslips() {
 
       const { data: employee, error: employeeError } = await supabase
         .from("employees")
-        .select("id, full_name, employee_no, department, position, base_salary, allowances")
+        .select(
+          "id, full_name, employee_no, department, position, base_salary, allowances, photo_path",
+        )
         .eq("auth_user_id", auth.user.id)
         .maybeSingle();
       if (employeeError) throw employeeError;
@@ -169,17 +172,24 @@ function MyPayslips() {
       {isLoading && <p className="text-sm text-muted-foreground">Loading your payslips…</p>}
       {!isLoading && !data?.employee && (
         <div className="rounded-sm border-l-4 border-gold bg-accent p-5 text-sm text-accent-foreground">
-          Your login is not yet linked to an employee record. Ask the BMP payroll administrator
-          to link your account.
+          Your login is not yet linked to an employee record. Ask the BMP payroll administrator to
+          link your account.
         </div>
       )}
       {data?.employee && (
         <>
-          <div className="mb-5 rounded-sm border bg-card p-4">
-            <p className="font-semibold">{data.employee.full_name}</p>
-            <p className="text-sm text-muted-foreground">
-              {data.employee.position} · {data.employee.department} · {data.employee.employee_no}
-            </p>
+          <div className="mb-5 flex items-center gap-3 rounded-sm border bg-card p-4">
+            <EmployeePhoto
+              path={data.employee.photo_path}
+              name={data.employee.full_name}
+              className="h-14 w-14"
+            />
+            <div>
+              <p className="font-semibold">{data.employee.full_name}</p>
+              <p className="text-sm text-muted-foreground">
+                {data.employee.position} · {data.employee.department} · {data.employee.employee_no}
+              </p>
+            </div>
           </div>
           <div className="mb-4 grid gap-3 sm:grid-cols-2">
             <label className="flex items-center gap-2 rounded-sm border bg-card px-3 py-2 text-sm">
@@ -231,11 +241,18 @@ function MyPayslips() {
               return (
                 <article key={slip.id} className="rounded-sm border bg-card">
                   <div className="flex items-center justify-between border-b p-4">
-                    <div>
-                      <h2 className="signage text-xl text-navy">{period}</h2>
-                      <p className="text-xs capitalize text-muted-foreground">
-                        {run?.run_type} payroll · {run?.status}
-                      </p>
+                    <div className="flex items-center gap-3">
+                      <EmployeePhoto
+                        path={data.employee.photo_path}
+                        name={data.employee.full_name}
+                        className="h-10 w-10"
+                      />
+                      <div>
+                        <h2 className="signage text-xl text-navy">{period}</h2>
+                        <p className="text-xs capitalize text-muted-foreground">
+                          {run?.run_type} payroll · {run?.status}
+                        </p>
+                      </div>
                     </div>
                     <button
                       onClick={() => {

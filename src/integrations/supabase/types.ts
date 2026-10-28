@@ -1266,6 +1266,7 @@ export type Database = {
           bank_name: string | null;
           base_salary: number;
           created_at: string;
+          cv_path: string | null;
           department: string;
           daily_rate: number | null;
           employment_type: string;
@@ -1273,8 +1274,11 @@ export type Database = {
           full_name: string;
           hired_on: string;
           id: string;
+          application_letter_path: string | null;
           nssf_no: string | null;
+          other_documents: Json;
           phone: string | null;
+          photo_path: string | null;
           position: string;
           status: string;
         };
@@ -1285,6 +1289,7 @@ export type Database = {
           bank_name?: string | null;
           base_salary?: number;
           created_at?: string;
+          cv_path?: string | null;
           department: string;
           daily_rate?: number | null;
           employment_type?: string;
@@ -1292,8 +1297,11 @@ export type Database = {
           full_name: string;
           hired_on?: string;
           id?: string;
+          application_letter_path?: string | null;
           nssf_no?: string | null;
+          other_documents?: Json;
           phone?: string | null;
+          photo_path?: string | null;
           position: string;
           status?: string;
         };
@@ -1304,6 +1312,7 @@ export type Database = {
           bank_name?: string | null;
           base_salary?: number;
           created_at?: string;
+          cv_path?: string | null;
           department?: string;
           daily_rate?: number | null;
           employment_type?: string;
@@ -1311,8 +1320,11 @@ export type Database = {
           full_name?: string;
           hired_on?: string;
           id?: string;
+          application_letter_path?: string | null;
           nssf_no?: string | null;
+          other_documents?: Json;
           phone?: string | null;
+          photo_path?: string | null;
           position?: string;
           status?: string;
         };

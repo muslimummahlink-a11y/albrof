@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
+import { EmployeePhoto } from "@/components/EmployeePhoto";
 import { StyledSelect } from "@/components/StyledSelect";
 import { EmployeeIdCard } from "@/components/EmployeeIdCard";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,7 +19,6 @@ function IdCards() {
   const [selectedId, setSelectedId] = useState("");
   const [search, setSearch] = useState("");
   const [cardFilter, setCardFilter] = useState("all");
-  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const { data: employees = [], isLoading } = useQuery({
     queryKey: ["employees"],
     queryFn: async () => {
@@ -42,6 +42,19 @@ function IdCards() {
     () => employees.find((item) => item.id === selectedId),
     [employees, selectedId],
   );
+  const { data: photoUrl = null, error: photoError } = useQuery({
+    queryKey: ["employee-photo", employee?.photo_path],
+    enabled: Boolean(employee?.photo_path),
+    staleTime: 45 * 60 * 1000,
+    queryFn: async () => {
+      if (!employee?.photo_path) return null;
+      const { data, error } = await supabase.storage
+        .from("employee-documents")
+        .createSignedUrl(employee.photo_path, 60 * 60);
+      if (error) throw error;
+      return data.signedUrl;
+    },
+  });
   const issued = useMemo(
     () => new Map(issuedCards.map((card) => [card.employee_id, card.issued_at])),
     [issuedCards],
@@ -108,10 +121,7 @@ function IdCards() {
             <StyledSelect
               ariaLabel="Employee"
               value={selectedId}
-              onChange={(value) => {
-                setSelectedId(value);
-                setPhotoUrl(null);
-              }}
+              onChange={setSelectedId}
               placeholder="Choose an employee"
               options={employees.map((item) => ({
                 value: item.id,
@@ -121,39 +131,22 @@ function IdCards() {
               disabled={isLoading}
             />
           </label>
-          <label className="mt-4 block text-sm font-semibold">
-            Employee photo
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              disabled={!employee}
-              onChange={(event) => {
-                const file = event.currentTarget.files?.[0];
-                event.currentTarget.value = "";
-                if (!file) return;
-                if (file.size > 8 * 1024 * 1024) {
-                  toast.error("Choose a photo smaller than 8 MB.");
-                  return;
-                }
-                if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-                  toast.error("Choose a JPG, PNG, or WebP photo.");
-                  return;
-                }
-                const reader = new FileReader();
-                reader.onload = () => {
-                  if (typeof reader.result === "string") setPhotoUrl(reader.result);
-                  else toast.error("Could not read the selected employee photo.");
-                };
-                reader.onerror = () => toast.error("Could not read the selected employee photo.");
-                reader.readAsDataURL(file);
-              }}
-              className="mt-1 block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-2 file:font-semibold"
-            />
-            <span className="mt-1 block text-xs font-normal text-muted-foreground">
-              Optional. Used for this card preview and JPG only; it is not saved to the employee
-              record.
-            </span>
-          </label>
+          {employee && (
+            <div className="mt-4 flex items-center gap-3">
+              <EmployeePhoto
+                path={employee.photo_path}
+                name={employee.full_name}
+                className="h-14 w-14"
+              />
+              <p className="text-xs text-muted-foreground">
+                {employee.photo_path
+                  ? photoError
+                    ? "The employee photo could not be loaded."
+                    : "This saved employee photo is used on the ID card."
+                  : "No saved photo. Add one in the staff record to use it on the ID card."}
+              </p>
+            </div>
+          )}
           <div className="mt-4 flex flex-wrap gap-2">
             <button
               onClick={() => issueCard.mutate()}
@@ -231,9 +224,16 @@ function IdCards() {
             {filteredEmployees.map((item) => (
               <article key={item.id} className="rounded-sm border p-4">
                 <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="truncate font-semibold">{item.full_name}</p>
-                    <p className="font-mono text-xs text-muted-foreground">{item.employee_no}</p>
+                  <div className="flex min-w-0 items-center gap-3">
+                    <EmployeePhoto
+                      path={item.photo_path}
+                      name={item.full_name}
+                      className="h-12 w-12"
+                    />
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold">{item.full_name}</p>
+                      <p className="font-mono text-xs text-muted-foreground">{item.employee_no}</p>
+                    </div>
                   </div>
                   <span className="shrink-0 rounded-sm bg-secondary px-2 py-1 text-xs font-semibold">
                     {issued.has(item.id) ? "Issued" : "Not issued"}

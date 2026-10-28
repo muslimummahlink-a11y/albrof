@@ -4,6 +4,7 @@ import { useState } from "react";
 import { X } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
+import { EmployeePhoto } from "@/components/EmployeePhoto";
 import { PdfExportDialog } from "@/components/PdfExportDialog";
 import type { PdfExportFilters } from "@/components/PdfExportDialog";
 import { DatePicker } from "@/components/DatePicker";
@@ -100,7 +101,7 @@ function Attendance() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("attendance_logs")
-        .select("*, employees(full_name, employee_no)")
+        .select("*, employees(full_name, employee_no, photo_path)")
         .is("cancelled_at", null)
         .order("occurred_at", { ascending: false })
         .limit(200);
@@ -113,7 +114,7 @@ function Attendance() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("employees")
-        .select("id, employee_no, full_name, position, employment_type")
+        .select("id, employee_no, full_name, position, employment_type, photo_path")
         .eq("status", "active")
         .order("full_name");
       if (error) throw error;
@@ -157,7 +158,7 @@ function Attendance() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("casual_overtime_entries")
-        .select("*, employees(full_name, employee_no)")
+        .select("*, employees(full_name, employee_no, photo_path)")
         .eq("work_date", manualDate)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -502,11 +503,18 @@ function Attendance() {
                       key={employee.id}
                       className="min-w-0 rounded-sm border p-2 text-xs sm:p-3 sm:text-sm"
                     >
-                      <div className="mb-1.5 min-w-0">
-                        <span className="block truncate font-semibold">{employee.full_name}</span>
-                        <span className="block text-xs text-muted-foreground">
-                          {employee.employee_no} · {employee.position}
-                        </span>
+                      <div className="mb-1.5 flex min-w-0 items-center gap-2">
+                        <EmployeePhoto
+                          path={employee.photo_path}
+                          name={employee.full_name}
+                          className="h-9 w-9"
+                        />
+                        <div className="min-w-0">
+                          <span className="block truncate font-semibold">{employee.full_name}</span>
+                          <span className="block text-xs text-muted-foreground">
+                            {employee.employee_no} · {employee.position}
+                          </span>
+                        </div>
                       </div>
                       <StyledSelect
                         aria-label={`${employee.full_name} attendance status`}
@@ -675,9 +683,16 @@ function Attendance() {
               });
               return (
                 <article key={entry.id} className="rounded-sm border p-3 text-sm">
-                  <p className="font-semibold">
-                    {entry.employees?.full_name} · {ugx(amount)}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <EmployeePhoto
+                      path={entry.employees?.photo_path}
+                      name={entry.employees?.full_name ?? "Unknown staff"}
+                      className="h-9 w-9"
+                    />
+                    <p className="font-semibold">
+                      {entry.employees?.full_name} · {ugx(amount)}
+                    </p>
+                  </div>
                   <p className="text-xs text-muted-foreground">
                     {entry.method === "hours_rate"
                       ? `${entry.overtime_hours} hours × ${ugx(Number(entry.hourly_rate))}/hour`
@@ -844,13 +859,20 @@ function Attendance() {
           {filteredLogs.map((log) => (
             <article key={log.id} className="rounded-sm border bg-card p-3 sm:p-4">
               <div className="flex min-w-0 items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold">
-                    {log.employees?.full_name ?? "Unknown staff"}
-                  </p>
-                  <p className="font-mono text-[11px] text-muted-foreground sm:text-xs">
-                    {log.employees?.employee_no ?? "—"}
-                  </p>
+                <div className="flex min-w-0 items-center gap-2">
+                  <EmployeePhoto
+                    path={log.employees?.photo_path}
+                    name={log.employees?.full_name ?? "Unknown staff"}
+                    className="h-9 w-9"
+                  />
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold">
+                      {log.employees?.full_name ?? "Unknown staff"}
+                    </p>
+                    <p className="font-mono text-[11px] text-muted-foreground sm:text-xs">
+                      {log.employees?.employee_no ?? "—"}
+                    </p>
+                  </div>
                 </div>
                 <span className="max-w-[46%] shrink rounded-sm bg-secondary px-2 py-1 text-[10px] font-semibold leading-tight sm:text-xs">
                   {log.event_type}
