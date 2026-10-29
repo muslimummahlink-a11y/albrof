@@ -31,6 +31,35 @@ database access and server actions continue to require valid authentication.
 
 Payroll staff can create Monday-to-Sunday weekly runs and compile month-end summaries from the weekly runs whose end date falls in that month. Salaried weekly pay is calculated from the monthly salary, prorated over 52 weeks. Attendance and approved overtime are included as payroll summary information for salaried staff; the system does not apply automatic absence deductions or salaried overtime pay. For casual staff, attendance days determine pay and entered casual overtime is added to gross pay.
 
+## Employee contracts
+
+HR and administrators can manage staff contracts from People & Payroll. Active contracts expiring
+within 30 days are highlighted in the app and marked in the navigation. The builder lets HR edit
+employer and employee particulars, pay and working terms, duties, and reusable contract clauses;
+it provides a live print preview and stores the signed copy separately from any draft attachment.
+The employee editor can select an existing signed contract already linked to that employee as the
+employee's current contract; it cannot reassign contracts across employees.
+Have a qualified local HR/legal adviser review the contract wording before issuing it. Apply
+`20261029020000_employee_contracts.sql` after the employee profile/document migration, then apply
+`20261029030000_contract_document_builder.sql`. Contract files are private and accessible only to
+HR and administrators.
+
+Daily email reminders are sent to every HR and administrator account with an email address. To
+enable delivery, configure the Supabase Edge Function with a verified Resend sender and a generated
+job secret, then deploy it:
+
+```sh
+supabase secrets set RESEND_API_KEY="<Resend API key>" RESEND_FROM_EMAIL="<verified sender>" CONTRACT_JOB_SECRET="<generated secret>"
+supabase functions deploy contract-expiry-notifications
+```
+
+In Supabase Vault, save the function URL
+(`https://txujegjcmtoaoflwccps.supabase.co/functions/v1/contract-expiry-notifications`) as
+`contract_function_url` and the same generated secret as `contract_job_secret` before applying the
+contracts migration. It schedules a daily run at 06:00 Africa/Kampala. Reminder emails are sent
+once per contract end date and recipient; changing a contract's end date starts a new reminder
+cycle. Keep the Resend API key and job secret out of source control.
+
 ## Finance foundation
 
 The administrator/accountant Treasury & Accounts page supports UGX/USD cash, bank, and mobile-money

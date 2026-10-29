@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { Clapperboard, FileText, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell, Stat } from "@/components/AppShell";
 import { StyledSelect } from "@/components/StyledSelect";
@@ -37,13 +38,19 @@ function Dashboard() {
   const [runSearch, setRunSearch] = useState("");
   const [runStatus, setRunStatus] = useState("all");
   const [month] = useState(currentMonthInUganda);
-  const { data: financeAccess = { canView: false } } = useQuery({
+  const {
+    data: financeAccess = {
+      canView: false,
+      canViewProjects: false,
+      canManageClients: false,
+    },
+  } = useQuery({
     queryKey: ["dashboard-finance-access"],
     queryFn: async () => {
-      if (devAuthBypass) return { canView: true };
+      if (devAuthBypass) return { canView: true, canViewProjects: true, canManageClients: true };
       const { data: auth, error: authError } = await supabase.auth.getUser();
       if (authError) throw authError;
-      if (!auth.user) return { canView: false };
+      if (!auth.user) return { canView: false, canViewProjects: false, canManageClients: false };
       const { data, error } = await supabase
         .from("user_roles")
         .select("role")
@@ -51,10 +58,18 @@ function Dashboard() {
       if (error) throw error;
       return {
         canView: (data ?? []).some((role) => role.role === "admin" || role.role === "accountant"),
+        canViewProjects: (data ?? []).some((role) =>
+          ["admin", "hr", "accountant", "producer"].includes(role.role),
+        ),
+        canManageClients: (data ?? []).some((role) =>
+          ["admin", "hr", "accountant"].includes(role.role),
+        ),
       };
     },
   });
   const canViewFinance = financeAccess.canView;
+  const canViewProjects = financeAccess.canViewProjects;
+  const canManageClients = financeAccess.canManageClients;
 
   const { data: emps = [] } = useQuery({
     queryKey: ["employees"],
@@ -230,14 +245,50 @@ function Dashboard() {
           </>
         ) : (
           <>
-            <Stat label="Active staff" value={String(active.length)} />
             <Stat label="Monthly gross" value={ugx(totals.gross)} tone="crimson" />
             <Stat label="PAYE to URA" value={ugx(totals.paye)} tone="gold" />
             <Stat label="NSSF (total)" value={ugx(totals.nssf)} tone="pitch" />
           </>
         )}
+        <Stat label="Active employees" value={String(active.length)} />
         <Stat label="Pending approvals" value={String(pendingApprovalCount)} tone="gold" />
       </div>
+
+      {(canViewFinance || canViewProjects || canManageClients) && (
+        <section aria-label="Quick actions" className="mt-6 rounded-sm border bg-card p-4 sm:p-5">
+          <h2 className="signage text-xl text-navy">Quick actions</h2>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {canViewFinance && (
+              <Link
+                to="/quotations"
+                className="inline-flex items-center gap-2 rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"
+              >
+                <FileText className="h-4 w-4" />
+                Quotations
+              </Link>
+            )}
+            {canViewProjects && (
+              <Link
+                to="/projects"
+                className="inline-flex items-center gap-2 rounded-sm border px-4 py-2 text-sm font-semibold hover:bg-secondary"
+              >
+                <Clapperboard className="h-4 w-4" />
+                Projects
+              </Link>
+            )}
+            {canManageClients && (
+              <Link
+                to="/projects"
+                hash="clients"
+                className="inline-flex items-center gap-2 rounded-sm border px-4 py-2 text-sm font-semibold hover:bg-secondary"
+              >
+                <Users className="h-4 w-4" />
+                Clients
+              </Link>
+            )}
+          </div>
+        </section>
+      )}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1.55fr_1fr]">
         {canViewFinance ? (

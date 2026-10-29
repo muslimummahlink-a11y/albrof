@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAccountSettingsRouteImport } from './routes/_authenticated/account-settings'
 import { Route as AuthenticatedAttendanceRouteImport } from './routes/_authenticated/attendance'
 import { Route as AuthenticatedCasualPayrollImportRouteImport } from './routes/_authenticated/casual-payroll-import'
+import { Route as AuthenticatedContractsRouteImport } from './routes/_authenticated/contracts'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedEmployeesRouteImport } from './routes/_authenticated/employees'
 import { Route as AuthenticatedExpensesRouteImport } from './routes/_authenticated/expenses'
@@ -63,6 +64,11 @@ const AuthenticatedCasualPayrollImportRoute =
     path: '/casual-payroll-import',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedContractsRoute = AuthenticatedContractsRouteImport.update({
+  id: '/contracts',
+  path: '/contracts',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -153,6 +159,7 @@ export interface FileRoutesByFullPath {
   '/account-settings': typeof AuthenticatedAccountSettingsRoute
   '/attendance': typeof AuthenticatedAttendanceRoute
   '/casual-payroll-import': typeof AuthenticatedCasualPayrollImportRoute
+  '/contracts': typeof AuthenticatedContractsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/employees': typeof AuthenticatedEmployeesRoute
   '/expenses': typeof AuthenticatedExpensesRoute
@@ -176,6 +183,7 @@ export interface FileRoutesByTo {
   '/account-settings': typeof AuthenticatedAccountSettingsRoute
   '/attendance': typeof AuthenticatedAttendanceRoute
   '/casual-payroll-import': typeof AuthenticatedCasualPayrollImportRoute
+  '/contracts': typeof AuthenticatedContractsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/employees': typeof AuthenticatedEmployeesRoute
   '/expenses': typeof AuthenticatedExpensesRoute
@@ -201,6 +209,7 @@ export interface FileRoutesById {
   '/_authenticated/account-settings': typeof AuthenticatedAccountSettingsRoute
   '/_authenticated/attendance': typeof AuthenticatedAttendanceRoute
   '/_authenticated/casual-payroll-import': typeof AuthenticatedCasualPayrollImportRoute
+  '/_authenticated/contracts': typeof AuthenticatedContractsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/employees': typeof AuthenticatedEmployeesRoute
   '/_authenticated/expenses': typeof AuthenticatedExpensesRoute
@@ -226,6 +235,7 @@ export interface FileRouteTypes {
     | '/account-settings'
     | '/attendance'
     | '/casual-payroll-import'
+    | '/contracts'
     | '/dashboard'
     | '/employees'
     | '/expenses'
@@ -249,6 +259,7 @@ export interface FileRouteTypes {
     | '/account-settings'
     | '/attendance'
     | '/casual-payroll-import'
+    | '/contracts'
     | '/dashboard'
     | '/employees'
     | '/expenses'
@@ -273,6 +284,7 @@ export interface FileRouteTypes {
     | '/_authenticated/account-settings'
     | '/_authenticated/attendance'
     | '/_authenticated/casual-payroll-import'
+    | '/_authenticated/contracts'
     | '/_authenticated/dashboard'
     | '/_authenticated/employees'
     | '/_authenticated/expenses'
@@ -339,6 +351,13 @@ declare module '@tanstack/react-router' {
       path: '/casual-payroll-import'
       fullPath: '/casual-payroll-import'
       preLoaderRoute: typeof AuthenticatedCasualPayrollImportRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/contracts': {
+      id: '/_authenticated/contracts'
+      path: '/contracts'
+      fullPath: '/contracts'
+      preLoaderRoute: typeof AuthenticatedContractsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
@@ -460,6 +479,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccountSettingsRoute: typeof AuthenticatedAccountSettingsRoute
   AuthenticatedAttendanceRoute: typeof AuthenticatedAttendanceRoute
   AuthenticatedCasualPayrollImportRoute: typeof AuthenticatedCasualPayrollImportRoute
+  AuthenticatedContractsRoute: typeof AuthenticatedContractsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedEmployeesRoute: typeof AuthenticatedEmployeesRoute
   AuthenticatedExpensesRoute: typeof AuthenticatedExpensesRoute
@@ -482,6 +502,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccountSettingsRoute: AuthenticatedAccountSettingsRoute,
   AuthenticatedAttendanceRoute: AuthenticatedAttendanceRoute,
   AuthenticatedCasualPayrollImportRoute: AuthenticatedCasualPayrollImportRoute,
+  AuthenticatedContractsRoute: AuthenticatedContractsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedEmployeesRoute: AuthenticatedEmployeesRoute,
   AuthenticatedExpensesRoute: AuthenticatedExpensesRoute,

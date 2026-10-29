@@ -199,7 +199,7 @@ function ProjectsPage() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["business-parties"] });
       toast.success("Business contact saved.");
-      document.getElementById("business-party-form")?.querySelector("form")?.reset();
+      document.getElementById("clients")?.querySelector("form")?.reset();
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -332,10 +332,7 @@ function ProjectsPage() {
 
         {canManageProjectRecords && (
           <div className="grid gap-6 xl:grid-cols-2">
-            <section
-              id="business-party-form"
-              className="space-y-4 rounded-sm border bg-card p-4 sm:p-5"
-            >
+            <section id="clients" className="space-y-4 rounded-sm border bg-card p-4 sm:p-5">
               <div>
                 <h2 className="signage text-xl text-navy">Clients & suppliers</h2>
                 <p className="text-sm text-muted-foreground">
@@ -679,24 +676,24 @@ function ProjectsPage() {
                             );
                           })}
                         <div className="flex gap-2">
-                          <select
-                            aria-label={`Producer for ${project.project_code}`}
+                          <StyledSelect
+                            ariaLabel={`Producer for ${project.project_code}`}
                             value={producerForProject[project.id] ?? ""}
-                            onChange={(event) =>
+                            onChange={(value) =>
                               setProducerForProject((current) => ({
                                 ...current,
-                                [project.id]: event.target.value,
+                                [project.id]: value,
                               }))
                             }
+                            options={[
+                              { value: "", label: "Choose producer" },
+                              ...producerUsers.map((producer) => ({
+                                value: producer.user_id,
+                                label: producer.full_name || producer.email || producer.user_id,
+                              })),
+                            ]}
                             className={inputClass}
-                          >
-                            <option value="">Choose producer</option>
-                            {producerUsers.map((producer) => (
-                              <option key={producer.user_id} value={producer.user_id}>
-                                {producer.full_name || producer.email || producer.user_id}
-                              </option>
-                            ))}
-                          </select>
+                          />
                           <button
                             type="button"
                             disabled={

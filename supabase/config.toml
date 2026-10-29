@@ -2,3 +2,6 @@ project_id = "txujegjcmtoaoflwccps"
 
 [auth]
 enable_signup = false
+
+[functions.contract-expiry-notifications]
+verify_jwt = false

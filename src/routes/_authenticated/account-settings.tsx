@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { AlertTriangle } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -92,38 +91,6 @@ function AccountSettings() {
   return (
     <AppShell title="Account settings">
       <div className="mx-auto max-w-2xl space-y-6">
-        <section
-          aria-labelledby="hosting-notice-title"
-          className="rounded-sm border-l-4 border-gold bg-accent p-4 text-accent-foreground sm:p-5"
-        >
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
-            <div className="min-w-0 space-y-2">
-              <h2 id="hosting-notice-title" className="signage text-lg">
-                Important hosting and maintenance notice
-              </h2>
-              <p className="text-sm leading-relaxed">
-                The payroll database is hosted by TennaHub Technologies LTD. No database renewal fee
-                applies under the current arrangement. Server migrations that may interrupt system
-                operation will be communicated to BMP Media Production administration in writing
-                before the work.
-              </p>
-              <p className="flex flex-wrap gap-x-2 text-sm">
-                <a
-                  className="font-semibold underline underline-offset-2"
-                  href="mailto:info@tennahubapp.com"
-                >
-                  info@tennahubapp.com
-                </a>
-                <span aria-hidden="true">·</span>
-                <a className="font-semibold underline underline-offset-2" href="tel:+256745368426">
-                  +256 745 368 426
-                </a>
-              </p>
-            </div>
-          </div>
-        </section>
-
         <section className="space-y-4 rounded-sm border bg-card p-5">
           <div>
             <h2 className="signage text-xl text-navy">Profile</h2>

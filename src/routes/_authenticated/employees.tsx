@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +11,7 @@ import { PdfExportDialog } from "@/components/PdfExportDialog";
 import { StyledSelect } from "@/components/StyledSelect";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { computePayslip, ugx } from "@/lib/payroll";
+import { formatContractDate } from "@/lib/contracts";
 
 export const Route = createFileRoute("/_authenticated/employees")({
   head: () => ({ meta: [{ title: "Staff · BMP Media Production" }] }),
@@ -25,21 +26,53 @@ type EmployeeSaveInput = {
   cv: File | null;
   applicationLetter: File | null;
   otherDocuments: File[];
+  primaryContractId: string;
 };
 const DEPTS = [
-  "Administration",
-  "Grounds & Pitch",
-  "Security",
-  "Operations",
-  "Maintenance",
-  "Ticketing",
-  "Catering",
+  "Management & Administration",
+  "Production",
+  "Photography",
+  "Camera & Sound",
+  "Video Editing & Post-production",
+  "Creative & Graphic Design",
+  "Social Media & Digital Marketing",
+  "Sales & Client Relations",
+  "Finance & Accounting",
+  "Human Resources",
+  "IT & Equipment",
+  "Operations & Logistics",
 ];
+const DESIGNATIONS = [
+  "Managing Director",
+  "Producer",
+  "Production Manager",
+  "Project Manager",
+  "Videographer",
+  "Photographer",
+  "Video Editor",
+  "Photo Editor",
+  "Graphic Designer",
+  "Social Media Manager",
+  "Digital Marketer",
+  "Marketing Officer",
+  "Camera Operator",
+  "Sound Engineer",
+  "Accountant",
+  "HR Officer",
+  "Administrator",
+  "IT Technician",
+  "Security Officer",
+  "Groundskeeper",
+  "Ticketing Officer",
+  "Catering Staff",
+  "Driver",
+];
+const CUSTOM_DESIGNATION = "__custom_designation__";
 const empty = {
   employee_no: "",
   full_name: "",
   position: "",
-  department: "Administration",
+  department: "Management & Administration",
   phone: "",
   bank_name: "",
   account_no: "",
@@ -88,11 +121,41 @@ function Employees() {
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [applicationLetterFile, setApplicationLetterFile] = useState<File | null>(null);
   const [otherDocumentFiles, setOtherDocumentFiles] = useState<File[]>([]);
+  const [primaryContractId, setPrimaryContractId] = useState("");
+  const [customDesignationSelected, setCustomDesignationSelected] = useState(false);
   const { data: emps = [] } = useQuery({
     queryKey: ["employees"],
     queryFn: async () =>
       (await supabase.from("employees").select("*").order("full_name")).data ?? [],
   });
+  const {
+    data: employeeContracts = [],
+    isLoading: employeeContractsLoading,
+    isError: employeeContractsFailed,
+    error: employeeContractsError,
+  } = useQuery({
+    queryKey: ["employee-contracts-for-staff-form"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("employee_contracts")
+        .select(
+          "id, employee_id, contract_type, start_date, end_date, status, signed_document_path, is_primary",
+        )
+        .order("start_date", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+  useEffect(() => {
+    if (!edit?.id || employeeContractsLoading || employeeContractsFailed) return;
+    setPrimaryContractId(
+      employeeContracts.find((contract) => contract.employee_id === edit.id && contract.is_primary)
+        ?.id ?? "",
+    );
+  }, [edit?.id, employeeContracts, employeeContractsFailed, employeeContractsLoading]);
+  const departments = [
+    ...new Set([...DEPTS, ...emps.map((employee) => employee.department).filter(Boolean)]),
+  ];
 
   const save = useMutation({
     mutationFn: async ({
@@ -101,6 +164,7 @@ function Employees() {
       cv,
       applicationLetter,
       otherDocuments,
+      primaryContractId: selectedPrimaryContractId,
     }: EmployeeSaveInput) => {
       if (photo && (!PHOTO_TYPES.includes(photo.type) || photo.size > 5 * 1024 * 1024)) {
         throw new Error("Photo must be a JPEG, PNG, or WebP no larger than 5 MB.");
@@ -134,6 +198,45 @@ function Employees() {
         ? await supabase.from("employees").update(payload).eq("id", employeeId)
         : await supabase.from("employees").insert({ ...payload, id: employeeId });
       if (saveError) throw saveError;
+
+      const existingPrimaryContractId =
+        employeeContracts.find(
+          (contract) => contract.employee_id === employeeId && contract.is_primary,
+        )?.id ?? "";
+      if (selectedPrimaryContractId !== existingPrimaryContractId) {
+        const { error: clearPrimaryError } = await supabase
+          .from("employee_contracts")
+          .update({ is_primary: false, updated_at: new Date().toISOString() })
+          .eq("employee_id", employeeId)
+          .eq("is_primary", true);
+        if (clearPrimaryError) {
+          throw new Error(
+            `Staff details were saved, but the selected contract could not be updated: ${clearPrimaryError.message}`,
+          );
+        }
+
+        if (selectedPrimaryContractId) {
+          const { data: selectedContract, error: setPrimaryError } = await supabase
+            .from("employee_contracts")
+            .update({ is_primary: true, updated_at: new Date().toISOString() })
+            .eq("id", selectedPrimaryContractId)
+            .eq("employee_id", employeeId)
+            .eq("status", "active")
+            .not("signed_document_path", "is", null)
+            .select("id")
+            .maybeSingle();
+          if (setPrimaryError) {
+            throw new Error(
+              `Staff details were saved, but the selected contract could not be linked: ${setPrimaryError.message}`,
+            );
+          }
+          if (!selectedContract) {
+            throw new Error(
+              "Staff details were saved, but the selected signed contract is no longer available for this employee.",
+            );
+          }
+        }
+      }
 
       const filePaths = {
         photo_path: payload.photo_path ?? null,
@@ -186,10 +289,14 @@ function Employees() {
       return {
         employee: { ...employee, ...payload, ...filePaths, id: employeeId },
         uploadError,
+        primaryContractId: selectedPrimaryContractId,
       };
     },
-    onSuccess: ({ employee, uploadError }) => {
+    onSuccess: ({ employee, uploadError, primaryContractId: selectedPrimaryContractId }) => {
       qc.invalidateQueries({ queryKey: ["employees"] });
+      qc.invalidateQueries({ queryKey: ["employee-contracts-for-staff-form"] });
+      qc.invalidateQueries({ queryKey: ["employee-contracts"] });
+      setPrimaryContractId(selectedPrimaryContractId);
       if (uploadError) {
         setEdit(employee);
         setPhotoFile(null);
@@ -322,12 +429,21 @@ function Employees() {
     "w-full rounded-sm border border-input bg-card px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring";
   const fileInput =
     "mt-1 block w-full rounded-sm border border-input bg-card px-3 py-2 text-xs font-normal";
+  const designation = String(edit?.position ?? "");
 
   function openEditor(employee: Partial<Emp>) {
     setPhotoFile(null);
     setCvFile(null);
     setApplicationLetterFile(null);
     setOtherDocumentFiles([]);
+    setPrimaryContractId(
+      employeeContracts.find(
+        (contract) => contract.employee_id === employee.id && contract.is_primary,
+      )?.id ?? "",
+    );
+    setCustomDesignationSelected(
+      Boolean(employee.position && !DESIGNATIONS.includes(employee.position)),
+    );
     setEdit(employee);
   }
 
@@ -337,6 +453,8 @@ function Employees() {
     setCvFile(null);
     setApplicationLetterFile(null);
     setOtherDocumentFiles([]);
+    setPrimaryContractId("");
+    setCustomDesignationSelected(false);
   }
 
   async function openEmployeeFile(path: string, label: string) {
@@ -350,6 +468,24 @@ function Employees() {
     window.open(data.signedUrl, "_blank", "noopener,noreferrer");
   }
 
+  async function openSignedContract(path: string) {
+    const { data, error } = await supabase.storage
+      .from("employee-contracts")
+      .createSignedUrl(path, 60);
+    if (error) {
+      toast.error(`Signed contract could not be opened: ${error.message}`);
+      return;
+    }
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+  }
+
+  const selectableContracts = employeeContracts.filter(
+    (contract) =>
+      contract.employee_id === edit?.id &&
+      contract.signed_document_path !== null &&
+      (contract.status === "active" || contract.is_primary),
+  );
+
   return (
     <AppShell
       title="Staff"
@@ -361,7 +497,7 @@ function Employees() {
               id: employee.id,
               label: `${employee.employee_no} · ${employee.full_name}`,
             }))}
-            departments={DEPTS}
+            departments={departments}
             statuses={[
               { value: "all", label: "All statuses" },
               { value: "active", label: "Active" },
@@ -405,7 +541,7 @@ function Employees() {
           onChange={setDepartmentFilter}
           options={[
             { value: "all", label: "All departments" },
-            ...DEPTS.map((department) => ({ value: department, label: department })),
+            ...departments.map((department) => ({ value: department, label: department })),
           ]}
           className={inp}
         />
@@ -522,12 +658,17 @@ function Employees() {
             onSubmit={(e) => {
               e.preventDefault();
               if (edit) {
+                if (!String(edit.position ?? "").trim()) {
+                  toast.error("Choose or enter a staff designation.");
+                  return;
+                }
                 save.mutate({
                   employee: edit,
                   photo: photoFile,
                   cv: cvFile,
                   applicationLetter: applicationLetterFile,
                   otherDocuments: otherDocumentFiles,
+                  primaryContractId,
                 });
               }
             }}
@@ -542,8 +683,39 @@ function Employees() {
               <input required className={inp} {...f("full_name")} />
             </label>
             <label className="text-xs font-bold">
-              Role / Position
-              <input required className={inp} {...f("position")} />
+              Designation
+              <StyledSelect
+                ariaLabel="Staff designation"
+                value={customDesignationSelected ? CUSTOM_DESIGNATION : designation}
+                onChange={(value) => {
+                  const selectCustom = value === CUSTOM_DESIGNATION;
+                  setCustomDesignationSelected(selectCustom);
+                  setEdit({
+                    ...edit,
+                    position: selectCustom
+                      ? DESIGNATIONS.includes(designation)
+                        ? ""
+                        : designation
+                      : value,
+                  });
+                }}
+                placeholder="Choose a designation"
+                options={[
+                  ...DESIGNATIONS.map((item) => ({ value: item, label: item })),
+                  { value: CUSTOM_DESIGNATION, label: "Other (enter designation)" },
+                ]}
+                className={inp}
+              />
+              {customDesignationSelected && (
+                <input
+                  required
+                  aria-label="Custom staff designation"
+                  placeholder="Enter designation"
+                  value={designation}
+                  onChange={(event) => setEdit({ ...edit, position: event.target.value })}
+                  className={`${inp} mt-2`}
+                />
+              )}
             </label>
             <label className="text-xs font-bold">
               Department
@@ -551,7 +723,10 @@ function Employees() {
                 ariaLabel="Department"
                 value={String(edit?.department ?? "")}
                 onChange={(value) => setEdit({ ...edit, department: value })}
-                options={DEPTS.map((department) => ({ value: department, label: department }))}
+                options={departments.map((department) => ({
+                  value: department,
+                  label: department,
+                }))}
                 className={inp}
               />
             </label>
@@ -622,6 +797,68 @@ function Employees() {
                 className={inp}
               />
             </label>
+            <section className="space-y-2 rounded-sm border p-3 sm:col-span-2">
+              <h3 className="text-sm font-bold">Signed employment contract</h3>
+              <p className="text-xs font-normal text-muted-foreground">
+                Choose an uploaded, signed contract already linked to this employee. This selection
+                does not move contracts between employees.
+              </p>
+              <StyledSelect
+                aria-label="Select this employee's current signed contract"
+                value={primaryContractId}
+                onChange={setPrimaryContractId}
+                options={[
+                  { value: "", label: "No signed contract selected" },
+                  ...selectableContracts.map((contract) => ({
+                    value: contract.id,
+                    label: `${contract.contract_type.replaceAll("_", " ")} · ${
+                      contract.end_date
+                        ? `ends ${formatContractDate(contract.end_date)}`
+                        : "no fixed end date"
+                    }`,
+                  })),
+                ]}
+                disabled={!edit?.id || employeeContractsLoading || employeeContractsFailed}
+                className={inp}
+              />
+              {employeeContractsFailed && (
+                <p role="alert" className="text-xs text-destructive">
+                  Signed contracts could not be loaded:{" "}
+                  {employeeContractsError instanceof Error
+                    ? employeeContractsError.message
+                    : "Unknown error."}
+                </p>
+              )}
+              {employeeContractsLoading && (
+                <p className="text-xs font-normal text-muted-foreground">
+                  Loading signed contracts…
+                </p>
+              )}
+              {primaryContractId &&
+                selectableContracts.find((contract) => contract.id === primaryContractId)
+                  ?.signed_document_path && (
+                  <button
+                    type="button"
+                    className="text-left text-xs font-medium text-primary underline"
+                    onClick={() => {
+                      const selectedContract = selectableContracts.find(
+                        (contract) => contract.id === primaryContractId,
+                      );
+                      if (selectedContract?.signed_document_path) {
+                        void openSignedContract(selectedContract.signed_document_path);
+                      }
+                    }}
+                  >
+                    View selected signed contract
+                  </button>
+                )}
+              {edit?.id && !selectableContracts.length && (
+                <p className="text-xs font-normal text-muted-foreground">
+                  No active signed contracts are available for this employee. Upload and sign one
+                  from the Contracts page first.
+                </p>
+              )}
+            </section>
             <section className="grid gap-3 rounded-sm border p-3 sm:col-span-2 sm:grid-cols-2">
               <h3 className="text-sm font-bold sm:col-span-2">Staff photo and documents</h3>
               <div className="text-xs font-bold">

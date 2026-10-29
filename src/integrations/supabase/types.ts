@@ -1330,6 +1330,94 @@ export type Database = {
         };
         Relationships: [];
       };
+      employee_contracts: {
+        Row: {
+          contract_type: string;
+          contract_terms: Json;
+          created_at: string;
+          created_by: string;
+          document_path: string | null;
+          employee_id: string;
+          end_date: string | null;
+          id: string;
+          is_primary: boolean;
+          notes: string;
+          start_date: string;
+          status: string;
+          signed_document_path: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          contract_type: string;
+          contract_terms?: Json;
+          created_at?: string;
+          created_by?: string;
+          document_path?: string | null;
+          employee_id: string;
+          end_date?: string | null;
+          id?: string;
+          is_primary?: boolean;
+          notes?: string;
+          start_date: string;
+          status?: string;
+          signed_document_path?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          contract_type?: string;
+          contract_terms?: Json;
+          created_at?: string;
+          created_by?: string;
+          document_path?: string | null;
+          employee_id?: string;
+          end_date?: string | null;
+          id?: string;
+          is_primary?: boolean;
+          notes?: string;
+          start_date?: string;
+          status?: string;
+          signed_document_path?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "employee_contracts_employee_id_fkey";
+            columns: ["employee_id"];
+            isOneToOne: false;
+            referencedRelation: "employees";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      contract_expiry_email_log: {
+        Row: {
+          contract_end_date: string;
+          contract_id: string;
+          recipient_user_id: string;
+          sent_at: string;
+        };
+        Insert: {
+          contract_end_date: string;
+          contract_id: string;
+          recipient_user_id: string;
+          sent_at?: string;
+        };
+        Update: {
+          contract_end_date?: string;
+          contract_id?: string;
+          recipient_user_id?: string;
+          sent_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "contract_expiry_email_log_contract_id_fkey";
+            columns: ["contract_id"];
+            isOneToOne: false;
+            referencedRelation: "employee_contracts";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       payroll_runs: {
         Row: {
           created_at: string;
